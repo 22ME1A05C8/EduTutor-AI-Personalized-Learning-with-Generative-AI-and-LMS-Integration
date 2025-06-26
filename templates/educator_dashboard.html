@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Educator Dashboard - EduTutor AI{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-line me-2"></i>Educator Dashboard</h1>
+                <p class="lead">Monitor student progress and analyze learning outcomes</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon bg-primary">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stats-content">
+                    <h3>{{ courses|length }}</h3>
+                    <p>Active Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon bg-success">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-content">
+                    <h3>{{ student_analytics|map(attribute='student_name')|unique|list|length }}</h3>
+                    <p>Active Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon bg-info">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stats-content">
+                    <h3>{{ student_analytics|length }}</h3>
+                    <p>Total Quizzes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon bg-warning">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="stats-content">
+                    <h3>{{ "%.1f"|format((student_analytics|map(attribute='score')|sum) / (student_analytics|length) if student_analytics|length > 0 else 0) }}%</h3>
+                    <p>Class Average</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Management -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-book me-2"></i>My Courses</h5>
+                    <button class="btn btn-primary" onclick="syncGoogleClassroom()">
+                        <i class="fab fa-google me-2"></i>Sync Google Classroom
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                        <div class="row g-3">
+                            {% for course in courses %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="course-card">
+                                    <div class="course-header">
+                                        <h6>{{ course.name }}</h6>
+                                        {% if course.google_classroom_id %}
+                                            <span class="badge bg-success">
+                                                <i class="fab fa-google me-1"></i>Synced
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="course-description">{{ course.description or 'No description available' }}</p>
+                                    <div class="course-stats">
+                                        <small class="text-muted">
+                                            Created: {{ course.created_at.strftime('%Y-%m-%d') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                            <h5>No courses yet</h5>
+                            <p class="text-muted">Sync with Google Classroom to get started</p>
+                            <button class="btn btn-primary" onclick="syncGoogleClassroom()">
+                                <i class="fab fa-google me-2"></i>Sync Google Classroom
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Student Analytics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-analytics me-2"></i>Student Performance Analytics</h5>
+                </div>
+                <div class="card-body">
+                    {% if student_analytics %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Course</th>
+                                        <th>Last Topic</th>
+                                        <th>Score</th>
+                                        <th>Date</th>
+                                        <th>Performance Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for analytics in student_analytics %}
+                                    <tr>
+                                        <td>
+                                            <div class="student-info">
+                                                <i class="fas fa-user-circle me-2 text-primary"></i>
+                                                <strong>{{ analytics.student_name }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>{{ analytics.course_name }}</td>
+                                        <td>
+                                            <span class="topic-badge">
+                                                <i class="fas fa-book-open me-1"></i>
+                                                {{ analytics.topic }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if analytics.score >= 80 %}bg-success{% elif analytics.score >= 60 %}bg-warning{% else %}bg-danger{% endif %} fs-6">
+                                                {{ "%.1f"|format(analytics.score) }}%
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                {{ analytics.date.strftime('%Y-%m-%d %H:%M') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if analytics.score >= 80 %}
+                                                <span class="text-success">
+                                                    <i class="fas fa-arrow-up"></i> Improving
+                                                </span>
+                                            {% elif analytics.score >= 60 %}
+                                                <span class="text-warning">
+                                                    <i class="fas fa-minus"></i> Stable
+                                                </span>
+                                            {% else %}
+                                                <span class="text-danger">
+                                                    <i class="fas fa-arrow-down"></i> Needs Help
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Performance Insights -->
+                        <div class="mt-4">
+                            <h6><i class="fas fa-lightbulb me-2"></i>Performance Insights</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="insight-card">
+                                        <h6>Top Performers</h6>
+                                        <ul class="list-unstyled">
+                                            {% for analytics in student_analytics|sort(attribute='score', reverse=true)[:3] %}
+                                            <li class="mb-1">
+                                                <i class="fas fa-star text-warning me-1"></i>
+                                                {{ analytics.student_name }} ({{ "%.1f"|format(analytics.score) }}%)
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="insight-card">
+                                        <h6>Popular Topics</h6>
+                                        <ul class="list-unstyled">
+                                            {% for topic in student_analytics|map(attribute='topic')|unique|list[:3] %}
+                                            <li class="mb-1">
+                                                <i class="fas fa-book text-primary me-1"></i>
+                                                {{ topic }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="insight-card">
+                                        <h6>Students Needing Help</h6>
+                                        <ul class="list-unstyled">
+                                            {% for analytics in student_analytics|selectattr('score', '<', 60)[:3] %}
+                                            <li class="mb-1">
+                                                <i class="fas fa-exclamation-triangle text-danger me-1"></i>
+                                                {{ analytics.student_name }}
+                                            </li>
+                                            {% else %}
+                                            <li class="text-muted">All students performing well!</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-bar fa-4x text-muted mb-4"></i>
+                            <h4>No student data yet</h4>
+                            <p class="text-muted">Student quiz data will appear here once they start taking quizzes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function syncGoogleClassroom() {
+    // Implement Google Classroom sync
+    alert('Google Classroom integration would be implemented here. This would sync courses and student data.');
+}
+</script>
+{% endblock %}

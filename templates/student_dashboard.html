@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - EduTutor AI{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1><i class="fas fa-tachometer-alt me-2"></i>Student Dashboard</h1>
+                <p class="lead">Welcome back, {{ session.user_name }}! Ready to continue learning?</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon bg-primary">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stats-content">
+                    <h3>{{ total_quizzes }}</h3>
+                    <p>Total Quizzes Taken</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon bg-success">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stats-content">
+                    <h3>{{ avg_score }}%</h3>
+                    <p>Average Score</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stats-icon bg-info">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stats-content">
+                    <h3>{{ (recent_quizzes|selectattr('score', '>', 80)|list|length) }}</h3>
+                    <p>High Scores (>80%)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <div class="action-content">
+                    <h5>Take New Quiz</h5>
+                    <p>Start a new AI-generated quiz on any topic</p>
+                    <a href="{{ url_for('take_quiz') }}" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Start Quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="action-content">
+                    <h5>View Quiz History</h5>
+                    <p>Review your past quizzes and track progress</p>
+                    <a href="{{ url_for('quiz_history') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>View History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Quizzes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock me-2"></i>Recent Quiz Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_quizzes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Topic</th>
+                                        <th>Score</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for quiz in recent_quizzes %}
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-book me-2 text-primary"></i>
+                                            {{ quiz.topic }}
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if quiz.score >= 80 %}bg-success{% elif quiz.score >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ "%.1f"|format(quiz.score) }}%
+                                            </span>
+                                        </td>
+                                        <td>{{ quiz.completed_at.strftime('%Y-%m-%d %H:%M') if quiz.completed_at else 'In Progress' }}</td>
+                                        <td>
+                                            {% if quiz.completed_at %}
+                                                <span class="badge bg-success">Completed</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">In Progress</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h5>No quizzes taken yet</h5>
+                            <p class="text-muted">Start your learning journey by taking your first quiz!</p>
+                            <a href="{{ url_for('take_quiz') }}" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>Take First Quiz
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

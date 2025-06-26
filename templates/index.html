@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold text-primary mb-4">
+                        EduTutor AI
+                        <span class="text-secondary">Personalized Learning Platform</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        Revolutionary AI-powered education platform that provides dynamic quiz generation, 
+                        student evaluation, Google Classroom integration, and real-time feedback.
+                    </p>
+                    <div class="hero-buttons">
+                        {% if not session.user_id %}
+                            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-rocket me-2"></i>Get Started
+                            </a>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        {% else %}
+                            {% if session.user_type == 'student' %}
+                                <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a>
+                                <a href="{{ url_for('take_quiz') }}" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-play me-2"></i>Take Quiz
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('educator_dashboard') }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-chart-line me-2"></i>Educator Dashboard
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image">
+                    <div class="floating-card">
+                        <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                        <h4>AI-Powered Learning</h4>
+                        <p>Powered by IBM Watsonx and Granite foundation models</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Key Features</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h5>Dynamic Quiz Generation</h5>
+                    <p>AI-generated quizzes tailored to your learning needs and difficulty level.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5>Real-time Analytics</h5>
+                    <p>Track progress and performance with detailed analytics and insights.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fab fa-google"></i>
+                    </div>
+                    <h5>Google Classroom</h5>
+                    <p>Seamless integration with Google Classroom for easy course management.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h5>Personalized Learning</h5>
+                    <p>Adaptive learning paths that adjust to individual student needs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Scenarios Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Learning Scenarios</h2>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="scenario-card">
+                    <div class="scenario-number">01</div>
+                    <h4>Personalized Learning Experience</h4>
+                    <p>Students sync with Google Classroom, get AI-generated quizzes on key topics, and receive instant feedback for a personalized learning journey.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="scenario-card">
+                    <h4>Educator Dashboard & Insights</h4>
+                    <div class="scenario-number">02</div>
+                    <p>Educators monitor real-time quiz performance, view detailed analytics, and gain insights to personalize instruction based on data.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="scenario-card">
+                    <div class="scenario-number">03</div>
+                    <h4>Diagnostic Testing</h4>
+                    <p>New students take diagnostic tests generated by IBM Watsonx models, with adaptive difficulty based on performance results.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="scenario-card">
+                    <div class="scenario-number">04</div>
+                    <h4>Google Classroom Integration</h4>
+                    <p>Seamless course synchronization from Google Classroom enables automatic quiz topic generation aligned with curriculum.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
